@@ -79,9 +79,7 @@
   // POPOVER PLUGIN DEFINITION
   // =========================
 
-  var old = $.fn.popover
-
-  $.fn.popover = function (option) {
+  function Plugin(option) {
     return this.each(function () {
       var $this   = $(this)
       var data    = $this.data('bs.popover')
@@ -91,6 +89,10 @@
       if (typeof option == 'string') data[option]()
     })
   }
+
+  var old = $.fn.popover
+
+  $.fn.popover = Plugin
 
   $.fn.popover.Constructor = Popover
 

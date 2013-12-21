@@ -107,9 +107,7 @@
   // DROPDOWN PLUGIN DEFINITION
   // ==========================
 
-  var old = $.fn.dropdown
-
-  $.fn.dropdown = function (option) {
+  function Plugin(option) {
     return this.each(function () {
       var $this = $(this)
       var data  = $this.data('bs.dropdown')
@@ -118,6 +116,10 @@
       if (typeof option == 'string') data[option].call($this)
     })
   }
+
+  var old = $.fn.dropdown
+
+  $.fn.dropdown = Plugin
 
   $.fn.dropdown.Constructor = Dropdown
 

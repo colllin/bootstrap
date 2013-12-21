@@ -109,9 +109,7 @@
   // SCROLLSPY PLUGIN DEFINITION
   // ===========================
 
-  var old = $.fn.scrollspy
-
-  $.fn.scrollspy = function (option) {
+  function Plugin(option) {
     return this.each(function () {
       var $this   = $(this)
       var data    = $this.data('bs.scrollspy')
@@ -121,6 +119,10 @@
       if (typeof option == 'string') data[option]()
     })
   }
+
+  var old = $.fn.scrollspy
+
+  $.fn.scrollspy = Plugin
 
   $.fn.scrollspy.Constructor = ScrollSpy
 
@@ -140,7 +142,7 @@
   $(window).on('load', function () {
     $('[data-spy="scroll"]').each(function () {
       var $spy = $(this)
-      $spy.scrollspy($spy.data())
+      Plugin.call($spy, $spy.data())
     })
   })
 

@@ -183,9 +183,7 @@
   // MODAL PLUGIN DEFINITION
   // =======================
 
-  var old = $.fn.modal
-
-  $.fn.modal = function (option, _relatedTarget) {
+  function Plugin(option, _relatedTarget) {
     return this.each(function () {
       var $this   = $(this)
       var data    = $this.data('bs.modal')
@@ -196,6 +194,10 @@
       else if (options.show) data.show(_relatedTarget)
     })
   }
+
+  var old = $.fn.modal
+
+  $.fn.modal = Plugin
 
   $.fn.modal.Constructor = Modal
 
@@ -220,8 +222,8 @@
 
     e.preventDefault()
 
+    Plugin.call($target, option, this)
     $target
-      .modal(option, this)
       .one('hide', function () {
         $this.is(':visible') && $this.focus()
       })

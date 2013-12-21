@@ -55,9 +55,7 @@
   // ALERT PLUGIN DEFINITION
   // =======================
 
-  var old = $.fn.alert
-
-  $.fn.alert = function (option) {
+  function Plugin(option) {
     return this.each(function () {
       var $this = $(this)
       var data  = $this.data('bs.alert')
@@ -66,6 +64,10 @@
       if (typeof option == 'string') data[option].call($this)
     })
   }
+
+  var old = $.fn.alert
+
+  $.fn.alert = Plugin
 
   $.fn.alert.Constructor = Alert
 
