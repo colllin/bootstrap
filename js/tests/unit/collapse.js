@@ -1,29 +1,46 @@
 $(function () {
 
-    module('collapse')
-
-      test('should provide no conflict', function () {
-        var collapse = $.fn.collapse.noConflict()
-        ok(!$.fn.collapse, 'collapse was set back to undefined (org value)')
-        $.fn.collapse = collapse
-      })
+    module('collapse plugin')
 
       test('should be defined on jquery object', function () {
         ok($(document.body).collapse, 'collapse method is defined')
       })
 
+    module('collapse', {
+      setup: function() {
+        // Run all test in noConflict mode -- it's the only way to ensure that noConflict mode works
+        var _collapsePlugin = $.fn.collapse.noConflict()
+
+        // Re-write to take a jQuery object as the first parameter -- for more readable tests
+        window._collapse = function($el, args) {
+          return _collapsePlugin.apply($el, Array.prototype.slice.call(arguments, 1))
+        }
+
+        window._collapse.plugin = _collapsePlugin
+      },
+      teardown: function() {
+        // Re-attach as jQuery plugin
+        $.fn.collapse = window._collapse.plugin
+        delete window._collapse
+      }
+    })
+
+      test('should provide no conflict', function () {
+        ok(!$.fn.collapse, 'collapse was set back to undefined (org value)')
+      })
+
       test('should return element', function () {
-        ok($(document.body).collapse()[0] == document.body, 'document.body returned')
+        ok(_collapse( $(document.body) )[0] == document.body, 'document.body returned')
       })
 
       test('should show a collapsed element', function () {
-        var el = $('<div class="collapse"></div>').collapse('show')
+        var el = _collapse($('<div class="collapse"></div>'), 'show')
         ok(el.hasClass('in'), 'has class in')
         ok(/height/.test(el.attr('style')), 'has height set')
       })
 
       test('should hide a collapsed element', function () {
-        var el = $('<div class="collapse"></div>').collapse('hide')
+        var el = _collapse($('<div class="collapse"></div>'), 'hide')
         ok(!el.hasClass('in'), 'does not have class in')
         ok(/height/.test(el.attr('style')), 'has height set')
       })
@@ -31,7 +48,8 @@ $(function () {
       test('should not fire shown when show is prevented', function () {
         $.support.transition = false
         stop()
-        $('<div class="collapse"/>')
+        var div = $('<div class="collapse"/>')
+        div
           .on('show.bs.collapse', function (e) {
             e.preventDefault();
             ok(true);
@@ -40,13 +58,15 @@ $(function () {
           .on('shown.bs.collapse', function () {
             ok(false);
           })
-          .collapse('show')
+
+        _collapse(div, 'show')
       })
 
       test('should reset style to auto after finishing opening collapse', function () {
         $.support.transition = false
         stop()
-        $('<div class="collapse" style="height: 0px"/>')
+        var div = $('<div class="collapse" style="height: 0px"/>')
+        div
           .on('show.bs.collapse', function () {
             ok(this.style.height == '0px')
           })
@@ -54,7 +74,8 @@ $(function () {
             ok(this.style.height == 'auto')
             start()
           })
-          .collapse('show')
+
+        _collapse(div, 'show')
       })
 
       test('should add active class to target when collapse shown', function () {

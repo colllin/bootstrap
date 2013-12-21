@@ -1,20 +1,37 @@
 $(function () {
 
-    module('dropdowns')
-
-      test('should provide no conflict', function () {
-        var dropdown = $.fn.dropdown.noConflict()
-        ok(!$.fn.dropdown, 'dropdown was set back to undefined (org value)')
-        $.fn.dropdown = dropdown
-      })
+    module('dropdown plugin')
 
       test('should be defined on jquery object', function () {
         ok($(document.body).dropdown, 'dropdown method is defined')
       })
 
+    module('dropdowns', {
+      setup: function() {
+        // Run all test in noConflict mode -- it's the only way to ensure that noConflict mode works
+        var _dropdownPlugin = $.fn.dropdown.noConflict()
+
+        // Re-write to take a jQuery object as the first parameter -- for more readable tests
+        window._dropdown = function($el, args) {
+          return _dropdownPlugin.apply($el, Array.prototype.slice.call(arguments, 1))
+        }
+
+        window._dropdown.plugin = _dropdownPlugin
+      },
+      teardown: function() {
+        // Re-attach as jQuery plugin
+        $.fn.dropdown = window._dropdown.plugin
+        delete window._dropdown
+      }
+    })
+
+      test('should provide no conflict', function () {
+        ok(!$.fn.dropdown, 'dropdown was set back to undefined (org value)')
+      })
+
       test('should return element', function () {
         var el = $('<div />')
-        ok(el.dropdown()[0] === el[0], 'same element returned')
+        ok(_dropdown(el)[0] === el[0], 'same element returned')
       })
 
       test('should not open dropdown if target is disabled', function () {
@@ -29,7 +46,7 @@ $(function () {
             '</ul>' +
             '</li>' +
             '</ul>',
-            dropdown = $(dropdownHTML).find('[data-toggle="dropdown"]').dropdown().click()
+            dropdown = _dropdown( $(dropdownHTML).find('[data-toggle="dropdown"]') ).click()
 
         ok(!dropdown.parent('.dropdown').hasClass('open'), 'open class added on click')
       })
@@ -46,7 +63,7 @@ $(function () {
             '</ul>' +
             '</li>' +
             '</ul>',
-            dropdown = $(dropdownHTML).find('[data-toggle="dropdown"]').dropdown().click()
+            dropdown = _dropdown( $(dropdownHTML).find('[data-toggle="dropdown"]') ).click()
 
         ok(!dropdown.parent('.dropdown').hasClass('open'), 'open class added on click')
       })
@@ -63,7 +80,7 @@ $(function () {
             '</ul>' +
             '</li>' +
             '</ul>',
-            dropdown = $(dropdownHTML).find('[data-toggle="dropdown"]').dropdown().click()
+            dropdown = _dropdown( $(dropdownHTML).find('[data-toggle="dropdown"]') ).click()
 
         ok(dropdown.parent('.dropdown').hasClass('open'), 'open class added on click')
       })
@@ -80,7 +97,7 @@ $(function () {
             '</ul>' +
             '</li>' +
             '</ul>',
-            dropdown = $(dropdownHTML).find('[data-toggle="dropdown"]').dropdown().click()
+            dropdown = _dropdown( $(dropdownHTML).find('[data-toggle="dropdown"]') ).click()
 
         ok(dropdown.parent('.dropdown').hasClass('open'), 'open class added on click')
       })
@@ -101,8 +118,9 @@ $(function () {
             dropdown = $(dropdownHTML)
               .appendTo('#qunit-fixture')
               .find('[data-toggle="dropdown"]')
-              .dropdown()
-              .click()
+
+            _dropdown(dropdown)
+            dropdown.click()
 
         ok(dropdown.parent('.dropdown').hasClass('open'), 'open class added on click')
         $('body').click()
@@ -163,7 +181,8 @@ $(function () {
             dropdown = $(dropdownHTML)
               .appendTo('#qunit-fixture')
               .find('[data-toggle="dropdown"]')
-              .dropdown()
+              
+            _dropdown(dropdown)
 
         stop()
 
@@ -197,7 +216,8 @@ $(function () {
             dropdown = $(dropdownHTML)
               .appendTo('#qunit-fixture')
               .find('[data-toggle="dropdown"]')
-              .dropdown()
+            
+            _dropdown(dropdown)
 
         stop()
 

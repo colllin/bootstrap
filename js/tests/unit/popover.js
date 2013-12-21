@@ -1,38 +1,57 @@
 $(function () {
 
-    module('popover')
-
-      test('should provide no conflict', function () {
-        var popover = $.fn.popover.noConflict()
-        ok(!$.fn.popover, 'popover was set back to undefined (org value)')
-        $.fn.popover = popover
-      })
+    module('popover plugin')
 
       test('should be defined on jquery object', function () {
         var div = $('<div></div>')
         ok(div.popover, 'popover method is defined')
       })
 
+    module('popover', {
+      setup: function() {
+        // Run all test in noConflict mode -- it's the only way to ensure that noConflict mode works
+        var _popoverPlugin = $.fn.popover.noConflict()
+
+        // Re-write to take a jQuery object as the first parameter -- for more readable tests
+        window._popover = function($el, args) {
+          return _popoverPlugin.apply($el, Array.prototype.slice.call(arguments, 1))
+        }
+
+        window._popover.plugin = _popoverPlugin
+      },
+      teardown: function() {
+        // Re-attach as jQuery plugin
+        $.fn.popover = window._popover.plugin
+        delete window._popover
+      }
+    })
+
+      test('should provide no conflict', function () {
+        ok(!$.fn.popover, 'popover was set back to undefined (org value)')
+      })
+
       test('should return element', function () {
         var div = $('<div></div>')
-        ok(div.popover() == div, 'document.body returned')
+        ok(_popover(div) == div, 'document.body returned')
       })
 
       test('should render popover element', function () {
         $.support.transition = false
         var popover = $('<a href="#" title="mdo" data-content="http://twitter.com/mdo">@mdo</a>')
           .appendTo('#qunit-fixture')
-          .popover('show')
+        
+        _popover(popover, 'show')
 
         ok($('.popover').length, 'popover was inserted')
-        popover.popover('hide')
+        _popover(popover, 'hide')
         ok(!$('.popover').length, 'popover removed')
       })
 
       test('should store popover instance in popover data object', function () {
         $.support.transition = false
         var popover = $('<a href="#" title="mdo" data-content="http://twitter.com/mdo">@mdo</a>')
-          .popover()
+
+        _popover(popover)
 
         ok(!!popover.data('bs.popover'), 'popover instance exists')
       })
@@ -41,7 +60,8 @@ $(function () {
         $.support.transition = false
         var popover = $('<a href="#">@fat</a>')
           .appendTo('#qunit-fixture')
-          .popover({
+
+        _popover(popover, {
             title: function () {
               return '@fat'
             },
@@ -50,13 +70,13 @@ $(function () {
             }
           })
 
-        popover.popover('show')
+        _popover(popover, 'show')
 
         ok($('.popover').length, 'popover was inserted')
         equal($('.popover .popover-title').text(), '@fat', 'title correctly inserted')
         equal($('.popover .popover-content').text(), 'loves writing tests （╯°□°）╯︵ ┻━┻', 'content correctly inserted')
 
-        popover.popover('hide')
+        _popover(popover, 'hide')
         ok(!$('.popover').length, 'popover was removed')
         $('#qunit-fixture').empty()
       })
@@ -65,14 +85,15 @@ $(function () {
         $.support.transition = false
         var popover = $('<a href="#" title="@mdo" data-content="loves data attributes (づ｡◕‿‿◕｡)づ ︵ ┻━┻" >@mdo</a>')
           .appendTo('#qunit-fixture')
-          .popover()
-          .popover('show')
+          
+        _popover(popover)
+        _popover(popover, 'show')
 
         ok($('.popover').length, 'popover was inserted')
         equal($('.popover .popover-title').text(), '@mdo', 'title correctly inserted')
         equal($('.popover .popover-content').text(), 'loves data attributes (づ｡◕‿‿◕｡)づ ︵ ┻━┻', 'content correctly inserted')
 
-        popover.popover('hide')
+        _popover(popover, 'hide')
         ok(!$('.popover').length, 'popover was removed')
         $('#qunit-fixture').empty()
       })
@@ -82,17 +103,18 @@ $(function () {
         $.support.transition = false
         var popover = $('<a href="#" title="@mdo" data-content="loves data attributes (づ｡◕‿‿◕｡)づ ︵ ┻━┻" >@mdo</a>')
           .appendTo('#qunit-fixture')
-          .popover({
-              title: 'ignored title option',
-              content: 'ignored content option'
-          })
-          .popover('show')
+
+        _popover(popover, {
+          title: 'ignored title option',
+          content: 'ignored content option'
+        })
+        _popover(popover, 'show')
 
         ok($('.popover').length, 'popover was inserted')
         equal($('.popover .popover-title').text(), '@mdo', 'title correctly inserted')
         equal($('.popover .popover-content').text(), 'loves data attributes (づ｡◕‿‿◕｡)づ ︵ ┻━┻', 'content correctly inserted')
 
-        popover.popover('hide')
+        _popover(popover, 'hide')
         ok(!$('.popover').length, 'popover was removed')
         $('#qunit-fixture').empty()
       })
@@ -101,29 +123,34 @@ $(function () {
         $.support.transition = false
         var popover = $('<a href="#">@fat</a>')
           .appendTo('#qunit-fixture')
-          .popover({
-            title: 'Test',
-            content: 'Test',
-            template: '<div class="popover foobar"><div class="arrow"></div><div class="inner"><h3 class="title"></h3><div class="content"><p></p></div></div></div>'
-          })
 
-        popover.popover('show')
+        _popover(popover, {
+          title: 'Test',
+          content: 'Test',
+          template: '<div class="popover foobar"><div class="arrow"></div><div class="inner"><h3 class="title"></h3><div class="content"><p></p></div></div></div>'
+        })
+
+        _popover(popover, 'show')
 
         ok($('.popover').length, 'popover was inserted')
         ok($('.popover').hasClass('foobar'), 'custom class is present')
 
-        popover.popover('hide')
+        _popover(popover, 'hide')
         ok(!$('.popover').length, 'popover was removed')
         $('#qunit-fixture').empty()
       })
 
       test('should destroy popover', function () {
-        var popover = $('<div/>').popover({trigger: 'hover'}).on('click.foo', function () {})
+        var popover = $('<div/>')
+        popover
+          .on('click.foo', function () {})
+        _popover(popover, {trigger: 'hover'})
+
         ok(popover.data('bs.popover'), 'popover has data')
         ok($._data(popover[0], 'events').mouseover && $._data(popover[0], 'events').mouseout, 'popover has hover event')
         ok($._data(popover[0], 'events').click[0].namespace == 'foo', 'popover has extra click.foo event')
-        popover.popover('show')
-        popover.popover('destroy')
+        _popover(popover, 'show')
+        _popover(popover, 'destroy')
         ok(!popover.hasClass('in'), 'popover is hidden')
         ok(!popover.data('popover'), 'popover does not have data')
         ok($._data(popover[0],'events').click[0].namespace == 'foo', 'popover still has click.foo')

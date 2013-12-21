@@ -1,19 +1,36 @@
 $(function () {
 
-    module('tabs')
-
-      test('should provide no conflict', function () {
-        var tab = $.fn.tab.noConflict()
-        ok(!$.fn.tab, 'tab was set back to undefined (org value)')
-        $.fn.tab = tab
-      })
+    module('tab plugin')
 
       test('should be defined on jquery object', function () {
         ok($(document.body).tab, 'tabs method is defined')
       })
 
+    module('tabs', {
+      setup: function() {
+        // Run all test in noConflict mode -- it's the only way to ensure that noConflict mode works
+        var _tabPlugin = $.fn.tab.noConflict()
+
+        // Re-write to take a jQuery object as the first parameter -- for more readable tests
+        window._tab = function($el, args) {
+          return _tabPlugin.apply($el, Array.prototype.slice.call(arguments, 1))
+        }
+
+        window._tab.plugin = _tabPlugin
+      },
+      teardown: function() {
+        // Re-attach as jQuery plugin
+        $.fn.tab = window._tab.plugin
+        delete window._tab
+      }
+    })
+
+      test('should provide no conflict', function () {
+        ok(!$.fn.tab, 'tab was set back to undefined (org value)')
+      })
+
       test('should return element', function () {
-        ok($(document.body).tab()[0] == document.body, 'document.body returned')
+        ok(_tab( $(document.body) )[0] == document.body, 'document.body returned')
       })
 
       test('should activate element by tab id', function () {
@@ -24,10 +41,12 @@ $(function () {
 
         $('<ul><li id="home"></li><li id="profile"></li></ul>').appendTo('#qunit-fixture')
 
-        $(tabsHTML).find('li:last a').tab('show')
+        var last = $(tabsHTML).find('li:last a')
+        _tab(last, 'show')
         equal($('#qunit-fixture').find('.active').attr('id'), 'profile')
 
-        $(tabsHTML).find('li:first a').tab('show')
+        var first = $(tabsHTML).find('li:first a')
+        _tab(first, 'show')
         equal($('#qunit-fixture').find('.active').attr('id'), 'home')
       })
 
@@ -39,10 +58,12 @@ $(function () {
 
         $('<ul><li id="home"></li><li id="profile"></li></ul>').appendTo('#qunit-fixture')
 
-        $(pillsHTML).find('li:last a').tab('show')
+        var last = $(pillsHTML).find('li:last a')
+        _tab(last, 'show')
         equal($('#qunit-fixture').find('.active').attr('id'), 'profile')
 
-        $(pillsHTML).find('li:first a').tab('show')
+        var first = $(pillsHTML).find('li:first a')
+        _tab(first, 'show')
         equal($('#qunit-fixture').find('.active').attr('id'), 'home')
       })
 
@@ -50,7 +71,8 @@ $(function () {
       test('should not fire closed when close is prevented', function () {
         $.support.transition = false
         stop();
-        $('<div class="tab"/>')
+        var div = $('<div class="tab"/>')
+        div
           .on('show.bs.tab', function (e) {
             e.preventDefault();
             ok(true);
@@ -59,7 +81,8 @@ $(function () {
           .on('shown.bs.tab', function () {
             ok(false);
           })
-          .tab('show')
+
+        _tab(div, 'show')
       })
 
       test('show and shown events should reference correct relatedTarget', function () {
@@ -72,12 +95,19 @@ $(function () {
             '</li>' +
             '</ul>'
 
-        $(dropHTML).find('ul>li:first a').tab('show').end()
-          .find('ul>li:last a').on('show', function (event) {
+        var ul = $(dropHTML)
+        var first = ul.find('ul>li:first a')
+        _tab(first, 'show')
+
+        var last = ul.find('ul>li:last a')
+        last
+          .on('show', function (event) {
             equal(event.relatedTarget.hash, '#1-1')
-          }).on('shown', function (event) {
+          })
+          .on('shown', function (event) {
             equal(event.relatedTarget.hash, '#1-1')
-          }).tab('show')
+          })
+        _tab(last, 'show')
       })
 
 })
