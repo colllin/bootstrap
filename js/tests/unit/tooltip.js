@@ -13,20 +13,25 @@ $(function () {
 
     module('tooltip', {
       setup: function() {
+
         // Run all test in noConflict mode -- it's the only way to ensure that noConflict mode works
         var _tooltipPlugin = $.fn.tooltip.noConflict()
 
         // Re-write to take a jQuery object as the first parameter -- for more readable tests
+        // Usage: $('.my-selector').tooltip('show') becomes _tooltip( $('.my-selector'), 'show' )
         window._tooltip = function($el, args) {
           return _tooltipPlugin.apply($el, Array.prototype.slice.call(arguments, 1))
         }
 
         window._tooltip.plugin = _tooltipPlugin
+
       },
       teardown: function() {
+
         // Re-attach as jQuery plugin
         $.fn.tooltip = window._tooltip.plugin
         delete window._tooltip
+        
       }
     })
 

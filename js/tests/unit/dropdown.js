@@ -8,20 +8,25 @@ $(function () {
 
     module('dropdowns', {
       setup: function() {
+
         // Run all test in noConflict mode -- it's the only way to ensure that noConflict mode works
         var _dropdownPlugin = $.fn.dropdown.noConflict()
 
         // Re-write to take a jQuery object as the first parameter -- for more readable tests
+        // Usage: $('.my-selector').dropdown() becomes _dropdown( $('.my-selector') )
         window._dropdown = function($el, args) {
           return _dropdownPlugin.apply($el, Array.prototype.slice.call(arguments, 1))
         }
 
         window._dropdown.plugin = _dropdownPlugin
+
       },
       teardown: function() {
+
         // Re-attach as jQuery plugin
         $.fn.dropdown = window._dropdown.plugin
         delete window._dropdown
+        
       }
     })
 

@@ -13,20 +13,25 @@ $(function () {
 
   module('modal', {
       setup: function() {
+
         // Run all test in noConflict mode -- it's the only way to ensure that noConflict mode works
         var _modalPlugin = $.fn.modal.noConflict()
 
         // Re-write to take a jQuery object as the first parameter -- for more readable tests
+        // Usage: $('.my-selector').modal('show') becomes _modal( $('.my-selector'), 'show' )
         window._modal = function($el, args) {
           return _modalPlugin.apply($el, Array.prototype.slice.call(arguments, 1))
         }
 
         window._modal.plugin = _modalPlugin
+
       },
       teardown: function() {
+
         // Re-attach as jQuery plugin
         $.fn.modal = window._modal.plugin
         delete window._modal
+        
       }
     })
 

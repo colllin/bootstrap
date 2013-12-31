@@ -8,20 +8,25 @@ $(function () {
 
     module('button', {
       setup: function() {
+
         // Run all test in noConflict mode -- it's the only way to ensure that noConflict mode works
         var _buttonPlugin = $.fn.button.noConflict()
 
         // Re-write to take a jQuery object as the first parameter -- for more readable tests
+        // Usage: $('.my-selector').button('toggle') becomes _button( $('.my-selector'), 'toggle' )
         window._button = function($el, args) {
           return _buttonPlugin.apply($el, Array.prototype.slice.call(arguments, 1))
         }
 
         window._button.plugin = _buttonPlugin
+
       },
       teardown: function() {
+
         // Re-attach as jQuery plugin
         $.fn.button = window._button.plugin
         delete window._button
+        
       }
     })
 

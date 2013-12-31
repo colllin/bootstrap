@@ -8,20 +8,25 @@ $(function () {
 
     module('scrollspy', {
       setup: function() {
+
         // Run all test in noConflict mode -- it's the only way to ensure that noConflict mode works
         var _scrollspyPlugin = $.fn.scrollspy.noConflict()
 
         // Re-write to take a jQuery object as the first parameter -- for more readable tests
+        // Usage: $('.my-selector').scrollspy() becomes _scrollspy( $('.my-selector') )
         window._scrollspy = function($el, args) {
           return _scrollspyPlugin.apply($el, Array.prototype.slice.call(arguments, 1))
         }
 
         window._scrollspy.plugin = _scrollspyPlugin
+
       },
       teardown: function() {
+
         // Re-attach as jQuery plugin
         $.fn.scrollspy = window._scrollspy.plugin
         delete window._scrollspy
+        
       }
     })
 

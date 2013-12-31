@@ -8,20 +8,25 @@ $(function () {
 
     module('alert', {
       setup: function() {
+
         // Run all test in noConflict mode -- it's the only way to ensure that noConflict mode works
         var _alertPlugin = $.fn.alert.noConflict()
 
         // Re-write to take a jQuery object as the first parameter -- for more readable tests
+        // Usage: $('.my-selector').alert('close') becomes _alert( $('.my-selector'), 'close' )
         window._alert = function($el, args) {
           return _alertPlugin.apply($el, Array.prototype.slice.call(arguments, 1))
         }
 
         window._alert.plugin = _alertPlugin
+
       },
       teardown: function() {
+
         // Re-attach as jQuery plugin
         $.fn.alert = window._alert.plugin
         delete window._alert
+        
       }
     })
 

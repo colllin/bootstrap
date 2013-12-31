@@ -8,20 +8,25 @@ $(function () {
 
     module('carousel', {
       setup: function() {
+
         // Run all test in noConflict mode -- it's the only way to ensure that noConflict mode works
         var _carouselPlugin = $.fn.carousel.noConflict()
 
         // Re-write to take a jQuery object as the first parameter -- for more readable tests
+        // Usage: $('.my-selector').carousel('next') becomes _carousel( $('.my-selector'), 'next' )
         window._carousel = function($el, args) {
           return _carouselPlugin.apply($el, Array.prototype.slice.call(arguments, 1))
         }
 
         window._carousel.plugin = _carouselPlugin
+
       },
       teardown: function() {
+
         // Re-attach as jQuery plugin
         $.fn.carousel = window._carousel.plugin
         delete window._carousel
+        
       }
     })
 
@@ -60,7 +65,7 @@ $(function () {
           setTimeout(function () {
             ok($carousel.find('.item:eq(0)').is('.active'))
             ok($carousel.find('.carousel-indicators li:eq(0)').is('.active'))
-            $carousel.carousel('next')
+            _carousel($carousel, 'next')
           }, 1);
         })
         $carousel.one('slid.bs.carousel', function () {
@@ -70,7 +75,7 @@ $(function () {
             start()
           }, 1);
         })
-        $carousel.carousel('next')
+        _carousel($carousel, 'next')
       })
 
       test('should fire slide event with direction', function () {

@@ -9,20 +9,25 @@ $(function () {
 
     module('popover', {
       setup: function() {
+
         // Run all test in noConflict mode -- it's the only way to ensure that noConflict mode works
         var _popoverPlugin = $.fn.popover.noConflict()
 
         // Re-write to take a jQuery object as the first parameter -- for more readable tests
+        // Usage: $('.my-selector').popover('show') becomes _popover( $('.my-selector'), 'show' )
         window._popover = function($el, args) {
           return _popoverPlugin.apply($el, Array.prototype.slice.call(arguments, 1))
         }
 
         window._popover.plugin = _popoverPlugin
+
       },
       teardown: function() {
+
         // Re-attach as jQuery plugin
         $.fn.popover = window._popover.plugin
         delete window._popover
+        
       }
     })
 

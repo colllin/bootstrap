@@ -8,20 +8,25 @@ $(function () {
 
     module('tabs', {
       setup: function() {
+
         // Run all test in noConflict mode -- it's the only way to ensure that noConflict mode works
         var _tabPlugin = $.fn.tab.noConflict()
 
         // Re-write to take a jQuery object as the first parameter -- for more readable tests
+        // Usage: $('.my-selector').tab('show') becomes _tab( $('.my-selector'), 'show' )
         window._tab = function($el, args) {
           return _tabPlugin.apply($el, Array.prototype.slice.call(arguments, 1))
         }
 
         window._tab.plugin = _tabPlugin
+
       },
       teardown: function() {
+
         // Re-attach as jQuery plugin
         $.fn.tab = window._tab.plugin
         delete window._tab
+        
       }
     })
 

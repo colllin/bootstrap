@@ -8,20 +8,25 @@ $(function () {
 
     module('collapse', {
       setup: function() {
+
         // Run all test in noConflict mode -- it's the only way to ensure that noConflict mode works
         var _collapsePlugin = $.fn.collapse.noConflict()
 
         // Re-write to take a jQuery object as the first parameter -- for more readable tests
+        // Usage: $('.my-selector').collapse('show') becomes _collapse( $('.my-selector'), 'show' )
         window._collapse = function($el, args) {
           return _collapsePlugin.apply($el, Array.prototype.slice.call(arguments, 1))
         }
 
         window._collapse.plugin = _collapsePlugin
+
       },
       teardown: function() {
+
         // Re-attach as jQuery plugin
         $.fn.collapse = window._collapse.plugin
         delete window._collapse
+        
       }
     })
 

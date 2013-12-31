@@ -8,20 +8,25 @@ $(function () {
 
     module('affix', {
       setup: function() {
+
         // Run all test in noConflict mode -- it's the only way to ensure that noConflict mode works
         var _affixPlugin = $.fn.affix.noConflict()
 
         // Re-write to take a jQuery object as the first parameter -- for more readable tests
+        // Usage: $('.my-selector').affix({offset: {top: 10}}) becomes _affix( $('.my-selector'), {offset: {top: 10}} )
         window._affix = function($el, args) {
           return _affixPlugin.apply($el, Array.prototype.slice.call(arguments, 1))
         }
 
         window._affix.plugin = _affixPlugin
+
       },
       teardown: function() {
+
         // Re-attach as jQuery plugin
         $.fn.affix = window._affix.plugin
         delete window._affix
+        
       }
     })
 
@@ -46,7 +51,8 @@ $(function () {
         var template = $('<div id="affixTarget"><ul><li>Please affix</li><li>And unaffix</li></ul></div><div id="affixAfter" style="height: 20000px; display:block;"></div>')
         template.appendTo('body')
 
-        var affixer = $('#affixTarget').affix({
+        var affixer = $('#affixTarget');
+        _affix(affixer, {
           offset: $('#affixTarget ul').position()
         })
 
