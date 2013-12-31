@@ -33,7 +33,7 @@ $(function () {
         ok(_carousel( $(document.body) )[0] == document.body, 'document.body returned')
       })
 
-      test('should not fire sliden when slide is prevented', function () {
+      test('should not fire slide when slide is prevented', function () {
         $.support.transition = false
         stop()
         var div = $('<div class="carousel"/>')
@@ -48,6 +48,29 @@ $(function () {
           })
 
         _carousel(div, 'next')
+      })
+
+      test('should reset when slide is prevented', function () {
+        var template = '<div id="carousel-example-generic" class="carousel slide"><ol class="carousel-indicators"><li data-target="#carousel-example-generic" data-slide-to="0" class="active"></li><li data-target="#carousel-example-generic" data-slide-to="1"></li><li data-target="#carousel-example-generic" data-slide-to="2"></li></ol><div class="carousel-inner"><div class="item active"><div class="carousel-caption"></div></div><div class="item"><div class="carousel-caption"></div></div><div class="item"><div class="carousel-caption"></div></div></div><a class="left carousel-control" href="#carousel-example-generic" data-slide="prev"></a><a class="right carousel-control" href="#carousel-example-generic" data-slide="next"></a></div>'
+        var $carousel = $(template)
+        $.support.transition = false
+        stop()
+        $carousel.one('slide.bs.carousel', function (e) {
+          e.preventDefault()
+          setTimeout(function () {
+            ok($carousel.find('.item:eq(0)').is('.active'))
+            ok($carousel.find('.carousel-indicators li:eq(0)').is('.active'))
+            $carousel.carousel('next')
+          }, 1);
+        })
+        $carousel.one('slid.bs.carousel', function () {
+          setTimeout(function () {
+            ok($carousel.find('.item:eq(1)').is('.active'))
+            ok($carousel.find('.carousel-indicators li:eq(1)').is('.active'))
+            start()
+          }, 1);
+        })
+        $carousel.carousel('next')
       })
 
       test('should fire slide event with direction', function () {

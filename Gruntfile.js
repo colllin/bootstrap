@@ -9,7 +9,10 @@ module.exports = function (grunt) {
   RegExp.quote = function (string) {
     return string.replace(/[-\\^$*+?.()|[\]{}]/g, '\\$&')
   }
+
+  var fs = require('fs')
   var btoa = require('btoa')
+
   // Project configuration.
   grunt.initConfig({
 
@@ -18,8 +21,8 @@ module.exports = function (grunt) {
     banner: '/*!\n' +
               ' * Bootstrap v<%= pkg.version %> (<%= pkg.homepage %>)\n' +
               ' * Copyright <%= grunt.template.today("yyyy") %> <%= pkg.author %>\n' +
-              ' * Licensed under MIT (<%= _.pluck(pkg.licenses, "url").join(", ") %>)\n' +
-              ' */\n\n',
+              ' * Licensed under <%= _.pluck(pkg.licenses, "type") %> (<%= _.pluck(pkg.licenses, "url") %>)\n' +
+              ' */\n',
     jqueryCheck: 'if (typeof jQuery === "undefined") { throw new Error("Bootstrap requires jQuery") }\n\n',
 
     // Task configuration.
@@ -64,12 +67,16 @@ module.exports = function (grunt) {
       options: {
         csslintrc: '.csslintrc'
       },
-      src: ['dist/css/bootstrap.css', 'dist/css/bootstrap-theme.css']
+      src: [
+        'dist/css/bootstrap.css',
+        'dist/css/bootstrap-theme.css',
+        'docs-assets/css/docs.css'
+      ]
     },
 
     concat: {
       options: {
-        banner: '<%= banner %><%= jqueryCheck %>',
+        banner: '<%= banner %>\n<%= jqueryCheck %>',
         stripBanners: false
       },
       bootstrap: {
@@ -92,15 +99,24 @@ module.exports = function (grunt) {
     },
 
     uglify: {
-      options: {
-        banner: '<%= banner %>',
-        report: 'min'
-      },
       bootstrap: {
+        options: {
+          banner: '<%= banner %>\n',
+          report: 'min'
+        },
         src: ['<%= concat.bootstrap.dest %>'],
         dest: 'dist/js/<%= pkg.name %>.min.js'
       },
       customize: {
+        options: {
+          banner: '/*!\n' +
+          ' * Bootstrap Docs (<%= pkg.homepage %>)\n' +
+          ' * Copyright <%= grunt.template.today("yyyy") %> <%= pkg.author %>\n' +
+          ' * Licensed under the Creative Commons Attribution 3.0 Unported License. For\n' +
+          ' * details, see http://creativecommons.org/licenses/by/3.0/.\n' +
+          ' */\n',
+          report: 'min'
+        },
         src: [
           'docs-assets/js/less.js',
           'docs-assets/js/jszip.js',
@@ -254,7 +270,7 @@ module.exports = function (grunt) {
           build: process.env.TRAVIS_JOB_ID,
           concurrency: 3,
           urls: ['http://127.0.0.1:3000/js/tests/index.html'],
-          browsers: grunt.file.readYAML('sauce_browsers.yml')
+          browsers: grunt.file.readYAML('test-infra/sauce_browsers.yml')
         }
       }
     }
@@ -307,8 +323,6 @@ module.exports = function (grunt) {
   grunt.registerTask('change-version-number', ['sed']);
 
   grunt.registerTask('build-glyphicons-data', function () {
-    var fs = require('fs')
-
     // Pass encoding, utf8, so `readFileSync` will return a string instead of a
     // buffer
     var glyphiconsFile = fs.readFileSync('less/glyphicons.less', 'utf8')
@@ -316,9 +330,8 @@ module.exports = function (grunt) {
 
     // Use any line that starts with ".glyphicon-" and capture the class name
     var iconClassName = /^\.(glyphicon-[^\s]+)/
-    var glyphiconsData = '# Generated on ' + (new Date()) + '\n' +
-                         '# **Don\'t edit this directly!**\n' +
-                         '# Look at the \'build-glyphicons-data\' task in Gruntfile.js\n\n';
+    var glyphiconsData = '# This file is generated via Grunt task. **Do not edit directly.** \n' +
+                         '# See the \'build-glyphicons-data\' task in Gruntfile.js.\n\n';
     for (var i = 0, len = glpyhiconsLines.length; i < len; i++) {
       var match = glpyhiconsLines[i].match(iconClassName)
 
@@ -335,8 +348,6 @@ module.exports = function (grunt) {
 
   // task for building customizer
   grunt.registerTask('build-customizer', 'Add scripts/less files to customizer.', function () {
-    var fs = require('fs')
-
     function getFiles(type) {
       var files = {}
       fs.readdirSync(type)
