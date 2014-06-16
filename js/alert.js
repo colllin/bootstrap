@@ -41,9 +41,16 @@
         $parent = $this.hasClass('alert') ? $this : $this.parent()
       }
 
-      $parent.trigger(e = $.Event('close.bs.alert'))
+      e = $.Event('close.bs.alert')
+      e.preventDefault()
+      var isDefaultPrevented = false
+      e.preventDefault = function() {
+        isDefaultPrevented = true
+      }
 
-      if (e.isDefaultPrevented()) return
+      $parent.trigger(e)
+
+      if (isDefaultPrevented) return
 
       $parent.removeClass('in')
 
