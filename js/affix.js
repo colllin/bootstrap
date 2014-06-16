@@ -76,10 +76,15 @@
 
       var affixType = 'affix' + (affix ? '-' + affix : '')
       var e         = $.Event(affixType + '.bs.affix')
+      e.preventDefault()
+      var isDefaultPrevented = false
+      e.preventDefault = function() {
+        isDefaultPrevented = true
+      }
 
       this.$element.trigger(e)
 
-      if (e.isDefaultPrevented()) return
+      if (isDefaultPrevented) return
 
       this.affixed = affix
       this.unpin = affix == 'bottom' ? this.getPinnedOffset() : null
