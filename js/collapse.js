@@ -41,8 +41,13 @@
       if (this.transitioning || this.$element.hasClass('in')) return
 
       var startEvent = $.Event('show.bs.collapse')
+      startEvent.preventDefault()
+      var isDefaultPrevented = false
+      startEvent.preventDefault = function() {
+        isDefaultPrevented = true
+      }
       this.$element.trigger(startEvent)
-      if (startEvent.isDefaultPrevented()) return
+      if (isDefaultPrevented) return
 
       var actives = this.$parent && this.$parent.find('> .panel > .in')
 
@@ -83,8 +88,13 @@
       if (this.transitioning || !this.$element.hasClass('in')) return
 
       var startEvent = $.Event('hide.bs.collapse')
+      startEvent.preventDefault()
+      var isDefaultPrevented = false
+      startEvent.preventDefault = function() {
+        isDefaultPrevented = true
+      }
       this.$element.trigger(startEvent)
-      if (startEvent.isDefaultPrevented()) return
+      if (isDefaultPrevented) return
 
       var dimension = this.dimension()
 
