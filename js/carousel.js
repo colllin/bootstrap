@@ -122,8 +122,14 @@
         relatedTarget: relatedTarget,
         direction: direction
       })
+      slideEvent.preventDefault()
+      var isDefaultPrevented = false
+      slideEvent.preventDefault = function() {
+        isDefaultPrevented = true
+      }
+
       this.$element.trigger(slideEvent)
-      if (slideEvent.isDefaultPrevented()) return
+      if (isDefaultPrevented) return
 
       this.sliding = true
 
